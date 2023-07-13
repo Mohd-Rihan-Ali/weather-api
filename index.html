@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Weather App</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+      .weatherResults {
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="weather">
+      <h1>Check your city's weather Now!</h1>
+      <form id="weatherForm">
+        <label for="cityInput">Enter Cities (comma-separated):</label>
+        <input type="text" id="cityInput" class="cityInput" placeholder="Enter cities separated by commas">
+        <button type="submit" class="btn">Go</button>
+      </form>
+      <div class="weatherResults" id="weatherResults"></div>
+    </div>
+
+    <script>
+      const weatherForm = document.getElementById("weatherForm");
+      const cityInput = document.getElementById("cityInput");
+      const weatherResults = document.getElementById("weatherResults");
+
+      weatherForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const cities = cityInput.value.split(",").map(city => city.trim());
+
+        fetch("/getWeather", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ cities })
+        })
+        .then(response => response.json())
+        .then(data => {
+          let html = "";
+          data.forEach(result => {
+            html += `<div class="weatherResult">
+              <h2>${result.city}</h2>
+              <p>Temperature: <b>${result.temp}°C</b></p>
+              <p>${result.weatherDescription}</p>
+            </div>`;
+          });
+          weatherResults.innerHTML = html;
+        })
+        .catch(error => {
+          console.error("Error:", error);
+          weatherResults.innerHTML = "<p>Unexpected error while fetching details.</p>";
+        });
+      });
+    </script>
+  </body>
+</html>
